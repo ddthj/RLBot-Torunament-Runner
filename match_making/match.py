@@ -1,27 +1,76 @@
 import random
 
-from match_making.player import Player
+from gui.game import Game
+from gui.player import Player
 
 
-class Match():
-    def __init__(self):
-        self.loud = True #spam the console with match info, don't use if running more than 1 tournament
+class Match:
+    def __init__(self, globals):
+        self.auto = False
+        self.loud = False #spam the console with match info, don't use if running more than 1 tournament
         self.stages = 3 #number of stages in the tournament (qualifying, playoffs, finals)
-        self.firstRounds = 2 #number of matches each bot will play in the first round
+        self.firstRounds = 3 #number of matches each bot will play in the first round
         self.normalRounds = 1 #number of matches each bot will play in the playoffs/finals
-        self.firstcutoff = 0.5 #how many bots to cut after the first stage
-        self.cutoff = 0.5 #how many bots to cut after additional stages
+        self.firstcutoff = 0.45 #how many bots to cut after the first stage
+        self.cutoff = 0.3 #how many bots to cut after additional stages
         self.start_seeded = False #seed the bots
 
         self.nameid = 1
         self.matches = 0
         self.un = 0
         self.hu = 0
+        self.globals = globals
 
-        self.numPlayers = 22 #number of players
-
+        self.numPlayers = 0 #number of players
         self.activePlayers = []
+        file = "1v1Bots.txt"
+        self.loadPlayers(file)
         self.cutPlayers = []
+
+    def loadPlayers(self,file):
+        try:
+            f= open(file,"rb")
+            for line in f:
+                if len(line) > 1:
+                    self.activePlayers.append(Player(self.globals, line.decode("UTF-8"), 0, 0, 0))
+                    self.numPlayers += 1
+        except:
+            print("couldn't load players")
+
+
+    def matchRound(self):
+        matches = []
+        uncaught = []
+        for a in self.activePlayers:
+            if a.taken == False:
+                flag = True
+                for b in self.activePlayers:
+                    if b.taken == False and b != a and b not in a.opponents:
+                        a.taken = True
+                        b.taken = True
+                        matches.append(Game(a, b))
+                        flag = False
+                        a.opponents.append(b)
+                        b.opponents.append(a)
+                        break
+                if flag:
+                    uncaught.append(a) #if every bot has seen every other bot, there are uncaught match pairings
+        uncaught.sort(key=lambda bot: bot.points,reverse = True)
+        for a in uncaught: #uncaught pairings are dealt with as fairly as possible
+            if a.taken == False:
+                flag = True
+                for b in uncaught:
+                    if b.taken == False and b != a:
+                        a.taken = True
+                        b.taken = True
+                        matches.append(Game(a, b))
+                        flag = False
+                        break
+        for bot in self.activePlayers: #flag in all bots is reset
+            bot.taken = False
+        return matches
+
+
 
     def runTournament(self, sample = 1):
         print("Running %s Tournament(s)" % (str(sample)))
@@ -115,7 +164,7 @@ class Match():
         total = 100
         for i in range(self.numPlayers):
             a,b,c = self.abc(total)
-            self.activePlayers.append(Player(str(self.nameid),a,b,c))
+            self.activePlayers.append(Player(str(self.nameid), a, b, c))
             self.nameid += 1
             total -= scale
         if self.start_seeded == False:
@@ -230,6 +279,7 @@ class Match():
         return int((totalError/maxError)*100)
 
     def finish(self): #combines active and cut players and sorts by points
+        counter = 1
         final = []
         for item in self.activePlayers:
             final.append(item)
@@ -242,4 +292,7 @@ class Match():
                 print(item.ts())
             print("Unfairness: %s" % (str(self.rateFairness())))
             print("Matches Played: %s"%(self.matches))
-        return self.rateFairness()
+        for item in final:
+            item.rank = counter
+            counter += 1
+        return final

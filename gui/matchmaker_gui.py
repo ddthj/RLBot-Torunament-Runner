@@ -3,7 +3,7 @@ import time
 
 import sys
 
-from gui.match import Match
+from match_making.match import Match
 from gui.utils import blue, white, onScreen, randomTarget, RANKS, DURING_MATCH, UPCOMING_MATCHES
 
 

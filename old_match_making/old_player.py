@@ -1,5 +1,5 @@
 
-class Player():
+class Old_Player():
     def __init__(self,name,a,b,c):
         self.name = name
         self.a = a #how good a bot is at doing A

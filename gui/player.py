@@ -82,3 +82,15 @@ class Player:
         total = str(self.name)
         total += (" a: %s b: %s c: %s Total: %s Bad: %s Points: %s" % (str(self.a),str(self.b),str(self.c),str(self.a + self.b + self.c), str(dif),str(self.points)))
         return total
+
+    def get_name(self):
+        return self.name
+
+    def get_config_location(self):
+        raise NotImplementedError()
+
+    def get_team(self):
+        raise NotImplementedError()
+
+    def get_loadout(self):
+        raise NotImplementedError()
