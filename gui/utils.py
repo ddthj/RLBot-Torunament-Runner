@@ -6,11 +6,11 @@ green = (0,255,0)
 grey = (150,150,150)
 
 RANKS = 0
-DURING_MATCH = 1
-UPCOMING_MATCHES = 3
+UPCOMING_MATCHES = 1
+DURING_MATCH = 2
 
 
-def randomTarget():
+def randomTarget(): #makes target offscreen
     x = random.randint(-1200,2500)
     while x < 1920 and x >-900 :
         x = random.randint(-1200,2500)

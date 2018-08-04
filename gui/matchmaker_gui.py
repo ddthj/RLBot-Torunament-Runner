@@ -24,7 +24,8 @@ class Gui:
         self.boxBgImage = globals.boxBgImage
         self.globals = globals
         self.window = globals.window
-
+        
+        self.popMatch = False
         self.run()
 
     def changeRECT(self,size):
@@ -42,7 +43,7 @@ class Gui:
     def run(self):
         clock = pygame.time.Clock()
         time.sleep(1)
-        while 1:
+        while 1:   
             clock.tick(40)
             self.window.fill(blue)
             for event in pygame.event.get():
@@ -55,14 +56,55 @@ class Gui:
                     elif event.button == 5:
                         self.scroll -=1
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == 51: # and self.mode == 0:
+                    if event.key == 50: # and self.mode == 0:
                         self.mode = UPCOMING_MATCHES
-                    elif event.key == 48: # and self.mode == 3:
+                    elif event.key == 49: # and self.mode == 3:
                         self.mode = RANKS
-                    elif event.key == 49:
+                    elif event.key == 51:
                         self.mode = DURING_MATCH
+                    elif event.key == 97 and self.mode == DURING_MATCH: #A Wins
+                        self.matches[0].a.win += 1
+                        self.matches[0].a.points += 2
+                        self.matches[0].a.opponents.append(self.matches[0].b)
+
+                        self.matches[0].b.opponents.append(self.matches[0].a)
+                        self.matches[0].b.loss += 1
+                         
+                        self.popMatch = True
+                    elif event.key == 115 and self.mode == DURING_MATCH: #A Wins Close Game
+                        self.matches[0].a.win += 1
+                        self.matches[0].a.points += 2
+                        self.matches[0].a.opponents.append(self.matches[0].b)
+
+                        self.matches[0].b.opponents.append(self.matches[0].a)
+                        self.matches[0].b.points += 1
+                        self.matches[0].b.loss += 1
+                        
+                        self.popMatch = True
+                    elif event.key == 100 and self.mode == DURING_MATCH:#B Wins Close Game
+                        self.matches[0].a.loss += 1
+                        self.matches[0].a.points += 1
+                        self.matches[0].a.opponents.append(self.matches[0].b)
+
+                        self.matches[0].b.opponents.append(self.matches[0].a)
+                        self.matches[0].b.points +=2
+                        self.matches[0].b.win += 1
+                         
+                        self.popMatch = True
+                    elif event.key == 102 and self.mode == DURING_MATCH: #B Wins
+                        self.matches[0].a.loss += 1
+                        self.matches[0].a.opponents.append(self.matches[0].b)
+
+                        self.matches[0].b.opponents.append(self.matches[0].a)
+                        self.matches[0].b.points += 2
+                        self.matches[0].b.win += 1
+                         
+                        self.popMatch = True
 
             if self.mode == RANKS:
+                if self.popMatch == True:
+                    self.popMatch = False
+                    self.matches.pop(0)
                 self.show_ranks()
             elif self.mode == DURING_MATCH:
                 self.start_match()
@@ -73,22 +115,36 @@ class Gui:
                 item.tick()
                 item.render()
 
+            if len(self.matches) < 1:
+                if self.tny.firstRounds > 1:
+                    self.tny.sortPlayers(False)
+                    self.tny.firstRounds -= 1
+                    self.matches = self.tny.matchRound()
+                else:
+                    if self.tny.stages - 1 > 1:
+                        self.tny.sortPlayers(False)
+                        self.tny.cut(0)
+                        self.tny.matchRound()
+                        self.tny.stages -= 1
+                    else:
+                        print("done?")
+
             pygame.display.update()
 
     def start_match(self):
-        if self.RECT_SIZE[0] ==900:
-            self.changeRECT((425,35))
+        if self.RECT_SIZE[0] != 640:
+            self.changeRECT((640,50))
         for item in self.tny.finish():
             if onScreen(item.target):
                 item.target = randomTarget()
-        y = self.RECT_SIZE[1] + int(self.RECT_SIZE[1] * 1.1)
+        y = self.RECT_SIZE[1] 
         xa = 50 + self.RECT_SIZE[0]/2
         xb = 1870 - self.RECT_SIZE[0]/2
         self.matches[0].a.target = [xa,y]
         self.matches[0].b.target = [xb,y]
 
     def show_ranks(self):
-        if self.RECT_SIZE[0] ==425:
+        if self.RECT_SIZE[0] !=900:
             self.scroll = 1
             self.changeRECT((900,70))
         bgRect = pygame.Rect(0,0,1920,1080)
@@ -105,11 +161,16 @@ class Gui:
     def show_upcoming_matches(self):
         bgRect = pygame.Rect(0,0,1920,1080)
         self.window.blit(self.backBg,bgRect)
-        if self.RECT_SIZE[0] ==900:
+        if self.RECT_SIZE[0] !=425:
             self.changeRECT((425,35))
-
+        for item in self.tny.finish():
+            if onScreen(item.target):
+                item.target = randomTarget()
         string = "Upcoming Matches"
         rect = self.boxFont.render(string,True,white)
+
+        vs = "VS"
+        vsRect = self.boxFont.render(vs,True,white)
 
         y =self.RECT_SIZE[1] + int(self.RECT_SIZE[1] * 1.1)*2
         self.window.blit(rect,(960- rect.get_width()/2,y/4))
@@ -118,4 +179,6 @@ class Gui:
             xb = int(960 + 25 +self.RECT_SIZE[0]/2)
             self.matches[x].a.target = [xa,y]
             self.matches[x].b.target = [xb,y]
+            self.window.blit(vsRect,(960- vsRect.get_width()/2,y-int(0.2*self.RECT_SIZE[1])))
             y += int(self.RECT_SIZE[1] * 1.1)*2
+            

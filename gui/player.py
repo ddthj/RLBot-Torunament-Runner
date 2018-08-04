@@ -13,7 +13,7 @@ class Player:
         self.points = 0 #points it has won
         self.win = 0
         self.loss = 0
-        self.close = 0
+        self.close = 0#probably not gonna use this
         self.matches = 0
         self.opponents = [] #opponents it has faced
         self.taken = False #if it has played a match in the current round

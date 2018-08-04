@@ -9,10 +9,10 @@ class Match:
         self.auto = False
         self.loud = False #spam the console with match info, don't use if running more than 1 tournament
         self.stages = 3 #number of stages in the tournament (qualifying, playoffs, finals)
-        self.firstRounds = 3 #number of matches each bot will play in the first round
+        self.firstRounds = 2 #number of matches each bot will play in the first round
         self.normalRounds = 1 #number of matches each bot will play in the playoffs/finals
-        self.firstcutoff = 0.45 #how many bots to cut after the first stage
-        self.cutoff = 0.3 #how many bots to cut after additional stages
+        self.firstcutoff = 0.5 #how many bots to cut after the first stage
+        self.cutoff = 0.5 #how many bots to cut after additional stages
         self.start_seeded = False #seed the bots
 
         self.nameid = 1
