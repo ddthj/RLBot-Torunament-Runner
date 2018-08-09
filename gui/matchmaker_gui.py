@@ -121,13 +121,9 @@ class Gui:
                     self.tny.firstRounds -= 1
                     self.matches = self.tny.matchRound()
                 else:
-                    if self.tny.stages - 1 > 1:
-                        self.tny.sortPlayers(False)
-                        self.tny.cut(0)
-                        self.tny.matchRound()
-                        self.tny.stages -= 1
-                    else:
-                        print("done?")
+                    self.tny.sortPlayers(False)
+                    self.tny.cut(0)
+                    self.matches  = self.tny.matchRound()
 
             pygame.display.update()
 

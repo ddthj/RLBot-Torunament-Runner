@@ -18,5 +18,6 @@ Air Bud
 AdversityBot
 TerrorByte
 Gosling
+Muffin Man
 Skybot
 2DayHackBot
